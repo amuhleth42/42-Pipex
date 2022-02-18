@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/18 19:28:35 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/18 19:49:28 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/02/18 20:01:14 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,16 @@ int	main(void)
 		srand(time(NULL));
 		n = rand() % 10 + 1;
 		i = 0;
+		printf("Generated: ");
 		while (i < n)
 		{
 			arr[i] = rand() % 151;
+			printf("%d ", arr[i]);
 			i++;
 		}
+		printf("\n");
 		write(fd[1], &n, sizeof(int));
+		printf("Sent n = %d\n", n);
 		write(fd[1], arr, sizeof(int) * n);
 		close(fd[1]);
 	}
