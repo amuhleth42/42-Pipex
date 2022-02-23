@@ -1,7 +1,7 @@
-SRCS	= v2.c
+SRCS	= pipex.c
 
 FLAGS	= -Wall -Wextra -Werror
-INCL	= -I./libft
+INCL	= -I./libft -I.
 LIB		= -L./libft -lft
 
 all :	pipex

@@ -6,13 +6,11 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/20 16:10:21 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/20 19:21:17 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/02/23 16:37:29 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include "libft.h"
-#include <fcntl.h>
+#include "pipex.h"
 
 void	cmd_1(char **argv, int fd_r, int fd_w)
 {
@@ -41,7 +39,6 @@ void	cmd_2(char **argv, int fd_r, int fd_w)
 	dup2(file_fd, 1);
 	close(file_fd);
 	arg = ft_split(argv[3], ' ');
-	wait(NULL);
 	execvp(arg[0], arg);
 }
 
@@ -50,30 +47,30 @@ int	pipex(char **argv)
 	int	pid1;
 	int	pid2;
 	int	fd[2];
+	int	wstatus;
 
-	if (pipe(fd) == -1)
-		return (2);
+	pipe(fd);
 	pid1 = fork();
-	if (pid1 < 0)
-		return (1);
 	if (pid1 == 0)
 		cmd_1(argv, fd[0], fd[1]);
 	pid2 = fork();
-	if (pid2 < 0)
-		return (3);
 	if (pid2 == 0)
 		cmd_2(argv, fd[0], fd[1]);
-	return (0);
+	close(fd[0]);
+	close(fd[1]);
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, &wstatus, 0);
+	return (wstatus);
 }
 
 int	main(int argc, char **argv)
 {
-	int	error;
-	if (argc != 5)
+	int	wstatus;
+	if (argc < 5)
 	{
-		ft_printf("Les arguments broo!\n");
-		return (0);
+		write(STDERR, "Invalid number of arguments\n", 28);
+		return (EXIT_FAILURE);
 	}
-	error = pipex(argv);
-	return (error);
+	wstatus = pipex(argv);
+	return (wstatus);
 }
