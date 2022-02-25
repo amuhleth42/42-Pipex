@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:40:18 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/23 22:33:17 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/02/25 17:01:01 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ char	*get_path(char *env_path, char *cmd)
 	char	*tmp;
 	char	*file;
 
-	(void) cmd;
 	dirs = ft_split(env_path, ':');
 	i = 0;
 	while (dirs[i] != NULL)
@@ -32,7 +31,9 @@ char	*get_path(char *env_path, char *cmd)
 		free(file);
 		i++;
 	}
-	return (NULL);
+	ft_putstr_fd(cmd, STDERR);
+	ft_putstr_fd(" : command not found\n", STDERR);
+	exit(EXIT_FAILURE);
 }
 
 void	exec_cmd(char *cmd, char **env)
@@ -47,29 +48,28 @@ void	exec_cmd(char *cmd, char **env)
 		i++;
 	if (!env[i])
 	{
-		//strerror
-		exit(1);
+		ft_putstr_fd("pipex : Path not found\n", STDERR);
+		exit(EXIT_FAILURE);
 	}
 	path = get_path(env[i] + 5, arg[0]);
 	execve(path, arg, env);
-	//die
+	die("exec");
 }
 
-void	exec_and_redirect(char *cmd, char **env)
+void	exec_and_redirect(char *cmd, char **env, int *fd_in)
 {
 	int	pid;
 	int	fd[2];
-	int	wstatus;
 
 	if (pipe(fd) == -1)
-		write(STDERR, "error\n", 6);
-		// handle error, die, pipe
+		die("pipe");
 	pid = fork();
 	if (pid < 0)
-		// die, fork
-		exit(1);
+		die("fork");
 	else if (pid == 0)
 	{
+		dup2(*fd_in, STDIN);
+		close(*fd_in);
 		close(fd[0]);
 		dup2(fd[1], STDOUT);
 		close(fd[1]);
@@ -77,62 +77,54 @@ void	exec_and_redirect(char *cmd, char **env)
 	}
 	else
 	{
+		close(*fd_in);
+		*fd_in = fd[0];
 		close(fd[1]);
-		dup2(fd[0], STDIN);
-		close(fd[0]);
-		wait(&wstatus);
-		if (wstatus)
-			exit(EXIT_FAILURE);
+		wait(NULL);
 	}
 }
 
-void	exec_last(char *cmd, char **env, int *wstatus)
+void	exec_last(char *cmd, char **env, int fd_in, int fd_out)
 {
 	int	pid;
 
 	pid = fork();
 	if (pid < 0)
-		write(STDERR, "error\n", 6);
-		// die, fork
+		die("fork");
 	else if (pid == 0)
 	{
+		dup2(fd_in, STDIN);
+		close(fd_in);
+		dup2(fd_out, STDOUT);
+		close(fd_out);
 		exec_cmd(cmd, env);
-		// die, exec
 	}
 	else
-		wait(wstatus);
+	{
+		close(fd_in);
+		close(fd_out);
+	}
 }
 
 int	main(int argc, char **argv, char **env)
 {
-	int	wstatus;
-	int	io[2];
-	int	i;
-	
-	if (argc < 5)
-	{
-		write(STDERR, "Invalid arguments\n", 18);
-		return (EXIT_FAILURE);
-	}
-	if (access(argv[1], F_OK) == -1)
-	{
-		write(STDERR, "No such file of directory\n", 26);
-		return (EXIT_FAILURE);
-	}
-	io[0] = open(argv[1], O_RDONLY);
-	io[1] = open(argv[argc - 1], O_WRONLY | O_CREAT, 0777);
-	if (io[0] == -1 || io[1] == -1)
-		return (EXIT_FAILURE);
-	dup2(io[0], STDIN);
-	close(io[0]);
-	i = 1;
+	int		fd_in;
+	int		fd_out;
+	int		status;
+	int		i;
+
+	handle_input_error(argc, argv);
+	fd_in = open(argv[1], O_RDONLY);
+	fd_out = open(argv[argc - 1], O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	if (fd_in == -1 || fd_out == -1)
+		die("open");
+	i = 2;
 	while (i < argc - 2)
 	{
-		exec_and_redirect(argv[i], env);
+		exec_and_redirect(argv[i], env, &fd_in);
 		i++;
 	}
-	dup2(io[1], STDOUT);
-	close(io[1]);
-	exec_last(argv[i], env, &wstatus);
-	return (wstatus);
+	exec_last(argv[i], env, fd_in, fd_out);
+	wait(&status);
+	return (status);
 }

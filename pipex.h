@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:22:20 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/23 16:25:36 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/02/25 17:03:25 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,5 +20,10 @@
 # include "libft.h"
 # include <fcntl.h>
 # include <sys/wait.h>
+# include <stdio.h>
+# include <errno.h>
+
+void	die(char *s);
+void	handle_input_error(int argc, char **argv);
 
 #endif

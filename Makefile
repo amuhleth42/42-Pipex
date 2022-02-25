@@ -1,4 +1,5 @@
-SRCS	= pipex.c
+SRCS	= 	pipex.c  \
+			error.c
 
 FLAGS	= -Wall -Wextra -Werror
 INCL	= -I./libft -I.
@@ -15,6 +16,10 @@ libft.a :
 clean :
 	make clean -C ./libft
 	rm pipex
+
+fclean :	clean
+
+bonus :		all
 
 re :	clean all
 
