@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:22:20 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/25 17:03:25 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/02/25 18:09:46 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,5 +25,10 @@
 
 void	die(char *s);
 void	handle_input_error(int argc, char **argv);
+
+char	*get_path(char *env_path, char *cmd);
+
+int		handle_heredoc(char *limiter);
+void	read_til_limiter(char *limiter, int p_write, int p_read);
 
 #endif

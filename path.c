@@ -1,31 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   error.c                                            :+:      :+:    :+:   */
+/*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/25 17:00:16 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/25 17:57:04 by amuhleth         ###   ########.fr       */
+/*   Created: 2022/02/25 18:08:51 by amuhleth          #+#    #+#             */
+/*   Updated: 2022/02/25 18:09:19 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	die(char *s)
+char	*get_path(char *env_path, char *cmd)
 {
-	ft_putstr_fd("pipex: ", STDERR);
-	perror(s);
-	exit(EXIT_FAILURE);
-}
+	char	**dirs;
+	int		i;
+	char	*tmp;
+	char	*file;
 
-void	handle_input_error(int argc, char **argv)
-{
-	if (argc < 5)
+	dirs = ft_split(env_path, ':');
+	i = 0;
+	while (dirs[i] != NULL)
 	{
-		write(STDERR, "Invalid arguments\n", 18);
-		exit(EXIT_FAILURE);
+		tmp = ft_strjoin(dirs[i], "/");
+		file = ft_strjoin(tmp, cmd);
+		free(tmp);
+		if (access(file, F_OK) == 0)
+			return (file);
+		free(file);
+		i++;
 	}
-	if ((access(argv[1], F_OK) == -1) && ft_strncmp(argv[1], "here_doc", 9))
-		die("access");
+	ft_putstr_fd(cmd, STDERR);
+	ft_putstr_fd(" : command not found\n", STDERR);
+	exit(EXIT_FAILURE);
 }

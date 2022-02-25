@@ -1,5 +1,7 @@
-SRCS	= 	pipex.c  \
-			error.c
+SRCS	= 	pipex.c 	\
+			error.c		\
+			here_doc.c	\
+			path.c		\
 
 FLAGS	= -Wall -Wextra -Werror
 INCL	= -I./libft -I.
