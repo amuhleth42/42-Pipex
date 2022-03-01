@@ -1,3 +1,5 @@
+NAME	= pipex
+
 SRCS	= 	pipex.c 	\
 			error.c		\
 			here_doc.c	\
@@ -7,17 +9,19 @@ FLAGS	= -Wall -Wextra -Werror
 INCL	= -I./libft -I.
 LIB		= -L./libft -lft
 
-all :	pipex
+all :	$(NAME)
 
 pipex :	libft.a
-	gcc $(FLAGS) $(INCL) $(LIB) $(SRCS) -o pipex
+	@gcc $(FLAGS) $(INCL) $(LIB) $(SRCS) -o $(NAME)
+	@printf "Pipex done!\n"
 
 libft.a :
 	make -C ./libft
 
 clean :
-	make clean -C ./libft
-	rm pipex
+	make fclean -C ./libft
+	@rm pipex
+	@printf "Pipex deleted\n"
 
 fclean :	clean
 
