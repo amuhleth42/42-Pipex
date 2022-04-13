@@ -1,9 +1,10 @@
 NAME	= pipex
 
-SRCS	= 	pipex.c 	\
-			error.c		\
-			here_doc.c	\
-			path.c		\
+SRCS	= 	$(addprefix srcs/,		\
+			pipex.c 				\
+			error.c					\
+			here_doc.c				\
+			path.c)
 
 FLAGS	= -Wall -Wextra -Werror
 INCL	= -I./libft -I.

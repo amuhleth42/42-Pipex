@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:40:18 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/25 19:20:07 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/04/13 15:48:16 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	exec_cmd(char *cmd, char **env)
 	die("exec");
 }
 
-void	exec_and_redirect(char *cmd, char **env, int *fd_in)
+void	exec_and_redirect(char *cmd, char **env, t_data *a)
 {
 	int	pid;
 	int	fd[2];
@@ -44,8 +44,8 @@ void	exec_and_redirect(char *cmd, char **env, int *fd_in)
 		die("fork");
 	else if (pid == 0)
 	{
-		dup2(*fd_in, STDIN);
-		close(*fd_in);
+		dup2(a->infile, STDIN);
+		close(a->infile);
 		close(fd[0]);
 		dup2(fd[1], STDOUT);
 		close(fd[1]);
@@ -53,14 +53,14 @@ void	exec_and_redirect(char *cmd, char **env, int *fd_in)
 	}
 	else
 	{
-		close(*fd_in);
-		*fd_in = fd[0];
+		close(a->infile);
+		a->infile = fd[0];
 		close(fd[1]);
 		wait(NULL);
 	}
 }
 
-void	exec_last(char *cmd, char **env, int fd_in, int fd_out)
+void	exec_last(char *cmd, char **env, t_data *a)
 {
 	int	pid;
 
@@ -69,51 +69,59 @@ void	exec_last(char *cmd, char **env, int fd_in, int fd_out)
 		die("fork");
 	else if (pid == 0)
 	{
-		dup2(fd_in, STDIN);
-		close(fd_in);
-		dup2(fd_out, STDOUT);
-		close(fd_out);
+		dup2(a->infile, STDIN);
+		close(a->infile);
+		dup2(a->outfile, STDOUT);
+		close(a->outfile);
 		exec_cmd(cmd, env);
 	}
 	else
 	{
-		close(fd_in);
-		close(fd_out);
+		close(a->infile);
+		close(a->outfile);
 	}
 }
 
-void	get_infile(char **argv, int *i, int *fd_in)
+void	get_infile(char **argv, int *i, t_data *a)
 {
 	if (ft_strncmp(argv[1], "here_doc", 9) == 0)
 	{
-		*fd_in = handle_heredoc(argv[2]);
+		a->infile = handle_heredoc(argv[2]);
 		*i = 3;
 	}
 	else
 	{
-		*fd_in = open(argv[1], O_RDONLY);
+		a->infile = open(argv[1], O_RDONLY);
 		*i = 2;
 	}
+	if (a->infile == -1)
+		die("open");
+}
+
+void	get_outfile(char *argv, t_data *a)
+{
+	a->outfile = open(argv, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	if (a->outfile == -1)
+		die("open");
 }
 
 int	main(int argc, char **argv, char **env)
 {
-	int		fd_in;
-	int		fd_out;
-	int		status;
+	t_data	a;
 	int		i;
+	int		status;
 
 	handle_input_error(argc, argv);
-	get_infile(argv, &i, &fd_in);
-	fd_out = open(argv[argc - 1], O_WRONLY | O_TRUNC | O_CREAT, 0777);
-	if (fd_in == -1 || fd_out == -1)
+	get_infile(argv, &i, &a);
+	get_outfile(argv[argc - 1], &a);
+	if (a.infile == -1 || a.outfile == -1)
 		die("open");
 	while (i < argc - 2)
 	{
-		exec_and_redirect(argv[i], env, &fd_in);
+		exec_and_redirect(argv[i], env, &a);
 		i++;
 	}
-	exec_last(argv[i], env, fd_in, fd_out);
+	exec_last(argv[i], env, &a);
 	wait(&status);
 	return (status);
 }

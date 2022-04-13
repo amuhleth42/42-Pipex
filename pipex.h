@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:22:20 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/25 18:09:46 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/04/13 15:33:38 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,12 @@
 # include <sys/wait.h>
 # include <stdio.h>
 # include <errno.h>
+
+typedef struct s_data
+{
+	int	infile;
+	int	outfile;
+}		t_data;
 
 void	die(char *s);
 void	handle_input_error(int argc, char **argv);
