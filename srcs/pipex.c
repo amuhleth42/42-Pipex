@@ -32,30 +32,53 @@ void	exec_cmd(char *cmd, char **env)
 	die("exec");
 }
 
-void	exec_and_redirect(char *cmd, char **env, t_data *a)
+void	redirection(t_data *a)
+{
+	if (a->i == 0)
+	{
+		dup2(a->infile, STDIN);
+		dup2(a->fd[a->i].w, STDOUT);
+	}
+	else if (a->i == a->nb_exec - 1)
+	{
+		dup2(a->fd[a->i - 1].r, STDIN);
+		dup2(a->outfile, STDOUT);
+	}
+	else
+	{
+		dup2(a->fd[a->i - 1].r, STDIN);
+		dup2(a->fd[a->i].w, STDOUT);
+	}
+}
+
+void	close_pipes(t_data *a)
+{
+	int	i;
+
+	i = 0;
+	while (i < a->nb_exec * 2 - 1)
+	{
+		close(a->fd[i].r);
+		close(a->fd[i].w);
+		i++;
+	}
+}
+
+void	exec_and_redirect(char **argv, char **env, t_data *a)
 {
 	int	pid;
-	int	fd[2];
 
-	if (pipe(fd) == -1)
-		die("pipe");
 	pid = fork();
 	if (pid < 0)
 		die("fork");
 	else if (pid == 0)
 	{
-		dup2(a->infile, STDIN);
-		close(a->infile);
-		close(fd[0]);
-		dup2(fd[1], STDOUT);
-		close(fd[1]);
-		exec_cmd(cmd, env);
+		redirection(a);
+		close_pipes(a);
+		exec_cmd(argv[2 * a->i + a->heredoc], env);
 	}
 	else
 	{
-		close(a->infile);
-		a->infile = fd[0];
-		close(fd[1]);
 		wait(NULL);
 	}
 }
@@ -82,46 +105,55 @@ void	exec_last(char *cmd, char **env, t_data *a)
 	}
 }
 
-void	get_infile(char **argv, int *i, t_data *a)
+void	get_infile(char **argv, t_data *a)
 {
-	if (ft_strncmp(argv[1], "here_doc", 9) == 0)
-	{
+	if (a->heredoc)
 		a->infile = handle_heredoc(argv[2]);
-		*i = 3;
-	}
 	else
-	{
 		a->infile = open(argv[1], O_RDONLY);
-		*i = 2;
-	}
-	if (a->infile == -1)
-		die("open");
 }
 
 void	get_outfile(char *argv, t_data *a)
 {
 	a->outfile = open(argv, O_WRONLY | O_TRUNC | O_CREAT, 0777);
 	if (a->outfile == -1)
-		die("open");
+		die("error : can't open outfile");
+}
+
+void	create_pipes(t_data *a)
+{
+	int	i;
+
+	a->fd = ft_calloc(a->nb_exec, sizeof(t_pipe));
+	if (!a->fd)
+		die("error : malloc failed");
+	i = 0;
+	while (i < a->nb_exec - 1)
+	{
+		if (pipe(&a->fd[i].r) < 0)
+			die("error : pipe");
+			//error, free
+		i++;
+	}
 }
 
 int	main(int argc, char **argv, char **env)
 {
 	t_data	a;
-	int		i;
 	int		status;
 
-	handle_input_error(argc, argv);
-	get_infile(argv, &i, &a);
+	ft_bzero(&a, sizeof(a));
+	handle_input_error(argc, argv, &a);
+	get_infile(argv, &a);
 	get_outfile(argv[argc - 1], &a);
-	if (a.infile == -1 || a.outfile == -1)
-		die("open");
-	while (i < argc - 2)
+	a.nb_exec = argc - 3 - a.heredoc;
+	create_pipes(&a);
+	while (a.i < a.nb_exec)
 	{
-		exec_and_redirect(argv[i], env, &a);
-		i++;
+		exec_and_redirect(argv, env, &a);
+		a.i++;
 	}
-	exec_last(argv[i], env, &a);
+	//exec_last(argv[i], env, &a);
 	wait(&status);
 	return (status);
 }

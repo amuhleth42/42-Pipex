@@ -23,14 +23,24 @@
 # include <stdio.h>
 # include <errno.h>
 
+typedef struct s_pipe
+{
+	int	r;
+	int	w;
+}		t_pipe;
+
 typedef struct s_data
 {
-	int	infile;
-	int	outfile;
+	int		infile;
+	int		outfile;
+	int		heredoc;
+	int		nb_exec;
+	t_pipe	*fd;
+	int		i;
 }		t_data;
 
 void	die(char *s);
-void	handle_input_error(int argc, char **argv);
+void	handle_input_error(int argc, char **argv, t_data *a);
 
 char	*get_path(char *env_path, char *cmd);
 
