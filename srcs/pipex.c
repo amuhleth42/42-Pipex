@@ -37,17 +37,17 @@ void	redirection(t_data *a)
 	if (a->i == 0)
 	{
 		dup2(a->infile, STDIN);
-		dup2(a->fd[a->i].w, STDOUT);
+		dup2(a->fd[a->i][1], STDOUT);
 	}
 	else if (a->i == a->nb_exec - 1)
 	{
-		dup2(a->fd[a->i - 1].r, STDIN);
+		dup2(a->fd[a->i - 1][0], STDIN);
 		dup2(a->outfile, STDOUT);
 	}
 	else
 	{
-		dup2(a->fd[a->i - 1].r, STDIN);
-		dup2(a->fd[a->i].w, STDOUT);
+		dup2(a->fd[a->i - 1][0], STDIN);
+		dup2(a->fd[a->i][1], STDOUT);
 	}
 }
 
@@ -56,15 +56,15 @@ void	close_pipes(t_data *a)
 	int	i;
 
 	i = 0;
-	while (i < a->nb_exec * 2 - 1)
+	while (i < a->nb_exec - 1)
 	{
-		close(a->fd[i].r);
-		close(a->fd[i].w);
+		close(a->fd[i][0]);
+		close(a->fd[i][1]);
 		i++;
 	}
 }
 
-void	exec_and_redirect(char **argv, char **env, t_data *a)
+void	child(char *cmd, char **env, t_data a)
 {
 	int	pid;
 
@@ -73,35 +73,9 @@ void	exec_and_redirect(char **argv, char **env, t_data *a)
 		die("fork");
 	else if (pid == 0)
 	{
-		redirection(a);
-		close_pipes(a);
-		exec_cmd(argv[2 * a->i + a->heredoc], env);
-	}
-	else
-	{
-		wait(NULL);
-	}
-}
-
-void	exec_last(char *cmd, char **env, t_data *a)
-{
-	int	pid;
-
-	pid = fork();
-	if (pid < 0)
-		die("fork");
-	else if (pid == 0)
-	{
-		dup2(a->infile, STDIN);
-		close(a->infile);
-		dup2(a->outfile, STDOUT);
-		close(a->outfile);
+		redirection(&a);
+		close_pipes(&a);
 		exec_cmd(cmd, env);
-	}
-	else
-	{
-		close(a->infile);
-		close(a->outfile);
 	}
 }
 
@@ -111,6 +85,8 @@ void	get_infile(char **argv, t_data *a)
 		a->infile = handle_heredoc(argv[2]);
 	else
 		a->infile = open(argv[1], O_RDONLY);
+	if (a->infile == -1)
+		die("error : cannot open infile");
 }
 
 void	get_outfile(char *argv, t_data *a)
@@ -124,13 +100,14 @@ void	create_pipes(t_data *a)
 {
 	int	i;
 
-	a->fd = ft_calloc(a->nb_exec, sizeof(t_pipe));
+	a->fd = ft_calloc(a->nb_exec - 1, sizeof(int *));
 	if (!a->fd)
 		die("error : malloc failed");
 	i = 0;
 	while (i < a->nb_exec - 1)
 	{
-		if (pipe(&a->fd[i].r) < 0)
+		a->fd[i] = ft_calloc(2, sizeof(int));
+		if (pipe(&a->fd[i][0]) < 0)
 			die("error : pipe");
 			//error, free
 		i++;
@@ -140,7 +117,7 @@ void	create_pipes(t_data *a)
 int	main(int argc, char **argv, char **env)
 {
 	t_data	a;
-	int		status;
+	//int		status;
 
 	ft_bzero(&a, sizeof(a));
 	handle_input_error(argc, argv, &a);
@@ -150,10 +127,10 @@ int	main(int argc, char **argv, char **env)
 	create_pipes(&a);
 	while (a.i < a.nb_exec)
 	{
-		exec_and_redirect(argv, env, &a);
+		child(argv[2 + a.heredoc + a.i], env, a);
 		a.i++;
 	}
-	//exec_last(argv[i], env, &a);
-	wait(&status);
-	return (status);
+	close_pipes(&a);
+	wait(&a.status);
+	return (a.status);
 }

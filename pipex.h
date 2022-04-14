@@ -35,7 +35,8 @@ typedef struct s_data
 	int		outfile;
 	int		heredoc;
 	int		nb_exec;
-	t_pipe	*fd;
+	int		status;
+	int		**fd;
 	int		i;
 }		t_data;
 
