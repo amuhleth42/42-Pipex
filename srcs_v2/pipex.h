@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:22:20 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/17 18:07:58 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/04/13 15:33:38 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@
 
 typedef struct s_pipe
 {
-	int	fd[2];
+	int	r;
+	int	w;
 }		t_pipe;
 
 typedef struct s_data
@@ -33,13 +34,14 @@ typedef struct s_data
 	int		infile;
 	int		outfile;
 	int		heredoc;
-	int		nb_pipes;
-	int		nb_cmd;
-	t_pipe	*pipes;
+	int		nb_exec;
+	int		status;
+	int		**fd;
+	int		i;
 }		t_data;
 
 void	die(char *s);
-void	handle_input_error(int argc, char **argv);
+void	handle_input_error(int argc, char **argv, t_data *a);
 
 char	*get_path(char *env_path, char *cmd);
 

@@ -1,6 +1,6 @@
 NAME	= pipex
 
-SRCS	= 	$(addprefix srcs/,		\
+SRCS	= 	$(addprefix srcs_v3/,		\
 			pipex.c 				\
 			error.c					\
 			here_doc.c				\
