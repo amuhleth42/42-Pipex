@@ -89,7 +89,10 @@ void	get_infile(char **argv, t_data *a)
 
 void	get_outfile(char *argv, t_data *a)
 {
-	a->outfile = open(argv, O_WRONLY | O_TRUNC | O_CREAT, 0664);
+	if (a->heredoc)
+		a->outfile = open(argv, O_WRONLY | O_TRUNC | O_APPEND, 0664);
+	else
+		a->outfile = open(argv, O_WRONLY | O_TRUNC | O_CREAT, 0664);
 	if (a->outfile == -1)
 		die("error : can't open outfile");
 }
