@@ -12,13 +12,27 @@
 
 #include "pipex.h"
 
-char	*get_path(char *env_path, char *cmd)
+char	*get_env_path(char **env)
+{
+	int	i;
+
+	i = 0;
+	while (ft_strncmp(env[i], "PATH=", 5) != 0)
+		i++;
+	if (!env[i])
+		die("pipex: path not found");
+	return (env[i] + 5);
+}
+
+char	*get_path(char **env, char *cmd)
 {
 	char	**dirs;
 	int		i;
 	char	*tmp;
 	char	*file;
+	char	*env_path;
 
+	env_path = get_env_path(env);
 	dirs = ft_split(env_path, ':');
 	i = 0;
 	while (dirs[i] != NULL)
@@ -32,7 +46,4 @@ char	*get_path(char *env_path, char *cmd)
 		i++;
 	}
 	return (NULL);
-	/*ft_putstr_fd(cmd, STDERR);
-	ft_putstr_fd(" : command not found\n", STDERR);
-	exit(EXIT_FAILURE); */
 }

@@ -39,9 +39,9 @@ typedef struct s_data
 }		t_data;
 
 void	die(char *s);
-void	handle_input_error(int argc, char **argv);
+void	handle_input_error(int argc, char **argv, t_data *a);
 
-char	*get_path(char *env_path, char *cmd);
+char	*get_path(char **env, char *cmd);
 
 int		handle_heredoc(char *limiter);
 void	read_til_limiter(char *limiter, int p_write, int p_read);

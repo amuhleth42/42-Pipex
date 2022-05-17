@@ -13,7 +13,7 @@ LIB		= -L./libft -lft
 all :	$(NAME)
 
 pipex :	libft.a
-	@gcc $(FLAGS) $(INCL) $(LIB) $(SRCS) -o $(NAME)
+	gcc $(FLAGS) $(INCL) $(LIB) $(SRCS) -o $(NAME)
 	@printf "Pipex done!\n"
 
 libft.a :

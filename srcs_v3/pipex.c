@@ -16,20 +16,23 @@ void	exec_cmd(char *cmd, char **env)
 {
 	char	*path;
 	char	**arg;
-	int		i;
 
 	arg = ft_split(cmd, ' ');
-	i = 0;
-	while (ft_strncmp(env[i], "PATH=", 5) != 0)
-		i++;
-	if (!env[i])
+	if (!ft_strchr(arg[0], '/'))
 	{
-		ft_putstr_fd("pipex : Path not found\n", STDERR);
-		exit(EXIT_FAILURE);
+		path = get_path(env, arg[0]);
+		execve(path, arg, env);
+		ft_putendl_fd("pipex: command not found", STDERR);
 	}
-	path = get_path(env[i] + 5, arg[0]);
-	execve(path, arg, env);
-	die("exec");
+	else
+	{
+		path = arg[0];
+		if (!access(path, X_OK))
+			execve(path, arg, env);
+		else
+			ft_putendl_fd("pipex: command not found", STDERR);
+	}
+	exit(127);
 }
 
 void	close_pipes(t_data *a)
@@ -69,34 +72,26 @@ void	exec_and_redirect(char *cmd, char **env, t_data *a, int i)
 		close_pipes(a);
 		exec_cmd(cmd, env);
 	}
-	/*else
-	{
-		close(a->infile);
-		a->infile = fd[0];
-		close(fd[1]);
-		wait(NULL);
-	}*/
 }
 
-void	get_infile(char **argv, int *i, t_data *a)
+void	get_infile(char **argv, t_data *a)
 {
-	if (ft_strncmp(argv[1], "here_doc", 9) == 0)
-	{
+	if (a->heredoc)
 		a->infile = handle_heredoc(argv[2]);
-		a->heredoc = 1;
-	}
 	else
 		a->infile = open(argv[1], O_RDONLY);
-	*i = 2 + a->heredoc;
 	if (a->infile == -1)
-		die("open");
+	{
+		ft_putendl_fd("error : can't open infile", STDERR);
+		exit(0);
+	}
 }
 
 void	get_outfile(char *argv, t_data *a)
 {
-	a->outfile = open(argv, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	a->outfile = open(argv, O_WRONLY | O_TRUNC | O_CREAT, 0664);
 	if (a->outfile == -1)
-		die("open");
+		die("error : can't open outfile");
 }
 
 void	create_pipes(t_data *a)
@@ -123,36 +118,20 @@ int	main(int argc, char **argv, char **env)
 	int		status;
 
 	ft_bzero(&a, sizeof(t_data));
-	handle_input_error(argc, argv);
-	get_infile(argv, &i, &a);
+	handle_input_error(argc, argv, &a);
+	get_infile(argv, &a);
 	get_outfile(argv[argc - 1], &a);
 	a.nb_pipes = argc - 3 - a.heredoc - 1;
 	a.nb_cmd = argc - 3 - a.heredoc;
 	create_pipes(&a);
-	while (i < argc - 1)
+	i = 0;
+	while (i < a.nb_cmd)
 	{
-		exec_and_redirect(argv[i], env, &a, i - 2 - a.heredoc);
+		exec_and_redirect(argv[i + 2 + a.heredoc], env, &a, i);
 		i++;
 	}
+	close_pipes(&a);
 	wait(&status);
-	return (status);
+	//return (WEXITSTATUS(status));
+	return (0);
 }
-
-/*int	main(int argc, char **argv, char **env)
-{
-	t_data	a;
-	int		i;
-	int		status;
-
-	handle_input_error(argc, argv);
-	get_infile(argv, &i, &a);
-	get_outfile(argv[argc - 1], &a);
-	while (i < argc - 2)
-	{
-		exec_and_redirect(argv[i], env, &a);
-		i++;
-	}
-	exec_last(argv[i], env, &a);
-	wait(&status);
-	return (status);
-}*/

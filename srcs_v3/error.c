@@ -19,13 +19,14 @@ void	die(char *s)
 	exit(EXIT_FAILURE);
 }
 
-void	handle_input_error(int argc, char **argv)
+void	handle_input_error(int argc, char **argv, t_data *a)
 {
-	if (argc < 5)
-	{
-		write(STDERR, "Invalid arguments\n", 18);
-		exit(EXIT_FAILURE);
-	}
-	if ((access(argv[1], F_OK) == -1) && ft_strncmp(argv[1], "here_doc", 9))
+	if (argc < 2)
+		die("Invalid number of argument");
+	if (ft_strncmp(argv[1], "here_doc", 9) == 0)
+		a->heredoc = 1;
+	if (argc < 5 + a->heredoc)
+		die("Invalid number of argument");
+	if ((access(argv[1], F_OK) == -1) && !a->heredoc)
 		die("access");
 }
