@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/19 15:46:55 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/19 15:49:14 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 17:18:27 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,5 +71,6 @@ void	exec_and_redirect(char *cmd, char **env, t_data *a, int i)
 			redirect(a->pipes[i - 1].fd[0], a->pipes[i].fd[1]);
 		close_pipes(a);
 		exec_cmd(cmd, env);
+		exit(127);
 	}
 }

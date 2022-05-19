@@ -1,10 +1,10 @@
 NAME	= pipex
 
-FLAGS	= -Wall -Wextra -Werror
+FLAGS	= -Wall -Wextra -Werror -g
 INCL	= -I./libft -I.
 LIB		= -L./libft -lft
 
-SRCS_DIR	= srcs_v3
+SRCS_DIR	= srcs
 OBJS_DIR	= $(shell mkdir -p objs && printf "objs")
 
 SRCS	=	pipex.c			\

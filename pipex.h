@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:22:20 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/19 15:50:26 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 16:20:44 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ typedef struct s_data
 	int		heredoc;
 	int		nb_pipes;
 	int		nb_cmd;
+	int		status;
 	t_pipe	*pipes;
 }		t_data;
 

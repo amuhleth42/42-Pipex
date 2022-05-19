@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:40:18 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/19 15:49:30 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 17:31:04 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	create_pipes(t_data *a)
 
 	a->pipes = ft_calloc(a->nb_pipes, sizeof(t_pipe));
 	if (!a->pipes)
-		exit(EXIT_FAILURE);
+		die("malloc failed");
 	i = 0;
 	while (i < a->nb_pipes)
 	{
@@ -55,7 +55,7 @@ int	main(int argc, char **argv, char **env)
 {
 	t_data	a;
 	int		i;
-	int		status;
+	int		wstatus;
 
 	ft_bzero(&a, sizeof(t_data));
 	handle_input_error(argc, argv, &a);
@@ -71,7 +71,8 @@ int	main(int argc, char **argv, char **env)
 		i++;
 	}
 	close_pipes(&a);
-	wait(&status);
-	//return (WEXITSTATUS(status));
-	return (status);
+	wait(&wstatus);
+	if (WIFEXITED(wstatus))
+		a.status = WEXITSTATUS(wstatus);
+	return (a.status);
 }
