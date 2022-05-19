@@ -1,20 +1,27 @@
 NAME	= pipex
 
-SRCS	= 	$(addprefix srcs_v3/,		\
-			pipex.c 				\
-			error.c					\
-			child.c					\
-			here_doc.c				\
-			path.c)
-
 FLAGS	= -Wall -Wextra -Werror
 INCL	= -I./libft -I.
 LIB		= -L./libft -lft
 
+SRCS_DIR	= srcs_v3
+OBJS_DIR	= $(shell mkdir -p objs && printf "objs")
+
+SRCS	=	pipex.c			\
+			error.c			\
+			child.c			\
+			here_doc.c		\
+			path.c			\
+
+OBJS	= $(SRCS:%.c=$(OBJS_DIR)/%.o)
+
 all :	$(NAME)
 
-pipex :	libft.a
-	gcc $(FLAGS) $(INCL) $(LIB) $(SRCS) -o $(NAME)
+$(OBJS_DIR)/%.o :	$(SRCS_DIR)/%.c
+	gcc $(FLAGS) $(INCL) -c $< -o $@
+
+$(NAME) :	libft.a $(OBJS)
+	gcc $(FLAGS) $(INCL) $(LIB) $(OBJS) -o $(NAME)
 	@printf "Pipex done!\n"
 
 libft.a :
@@ -22,8 +29,8 @@ libft.a :
 
 clean :
 	make fclean -C ./libft
-	@rm pipex
-	@printf "Pipex deleted\n"
+	rm pipex
+	rm -rf $(OBJS_DIR)
 
 fclean :	clean
 
@@ -31,4 +38,4 @@ bonus :		all
 
 re :	clean all
 
-.PHONY :	re all clean
+.PHONY :	re all clean fclean bonus

@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/25 17:00:16 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/19 15:34:33 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 16:10:55 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	die(char *s)
 {
 	ft_putstr_fd("pipex: ", STDERR);
-	perror(s);
+	ft_putendl_fd(s, STDERR);
 	exit(EXIT_FAILURE);
 }
 
