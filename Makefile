@@ -3,6 +3,7 @@ NAME	= pipex
 SRCS	= 	$(addprefix srcs_v3/,		\
 			pipex.c 				\
 			error.c					\
+			child.c					\
 			here_doc.c				\
 			path.c)
 

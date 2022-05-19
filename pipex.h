@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:22:20 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/17 18:07:58 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 15:50:26 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,14 @@ typedef struct s_data
 }		t_data;
 
 void	die(char *s);
+void	quit(t_data *a, char *s);
+void	free_split(char **strs);
 void	handle_input_error(int argc, char **argv, t_data *a);
 
 char	*get_path(char **env, char *cmd);
+
+void	exec_and_redirect(char *cmd, char **env, t_data *a, int i);
+void	close_pipes(t_data *a);
 
 int		handle_heredoc(char *limiter);
 void	read_til_limiter(char *limiter, int p_write, int p_read);

@@ -6,73 +6,11 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 16:40:18 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/17 18:27:24 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 15:49:30 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-void	exec_cmd(char *cmd, char **env)
-{
-	char	*path;
-	char	**arg;
-
-	arg = ft_split(cmd, ' ');
-	if (!ft_strchr(arg[0], '/'))
-	{
-		path = get_path(env, arg[0]);
-		execve(path, arg, env);
-		ft_putendl_fd("pipex: command not found", STDERR);
-	}
-	else
-	{
-		path = arg[0];
-		if (!access(path, X_OK))
-			execve(path, arg, env);
-		else
-			ft_putendl_fd("pipex: command not found", STDERR);
-	}
-	exit(127);
-}
-
-void	close_pipes(t_data *a)
-{
-	int	i;
-
-	i = 0;
-	while (i < a->nb_pipes)
-	{
-		close(a->pipes[i].fd[0]);
-		close(a->pipes[i].fd[1]);
-		i++;
-	}
-}
-
-void	redirect(int in, int out)
-{
-	dup2(in, 0);
-	dup2(out, 1);
-}
-
-void	exec_and_redirect(char *cmd, char **env, t_data *a, int i)
-{
-	int	pid;
-
-	pid = fork();
-	if (pid < 0)
-		die("fork");
-	else if (pid == 0)
-	{
-		if (i == 0)
-			redirect(a->infile, a->pipes[i].fd[1]);
-		else if (i == a->nb_cmd - 1)
-			redirect(a->pipes[i - 1].fd[0], a->outfile);
-		else
-			redirect(a->pipes[i - 1].fd[0], a->pipes[i].fd[1]);
-		close_pipes(a);
-		exec_cmd(cmd, env);
-	}
-}
 
 void	get_infile(char **argv, t_data *a)
 {
@@ -83,7 +21,7 @@ void	get_infile(char **argv, t_data *a)
 	if (a->infile == -1)
 	{
 		ft_putendl_fd("error : can't open infile", STDERR);
-		exit(0);
+		exit(1);
 	}
 }
 
@@ -102,14 +40,13 @@ void	create_pipes(t_data *a)
 	int	i;
 
 	a->pipes = ft_calloc(a->nb_pipes, sizeof(t_pipe));
-	if (!a->pipes) // to do free clean
+	if (!a->pipes)
 		exit(EXIT_FAILURE);
 	i = 0;
 	while (i < a->nb_pipes)
 	{
 		if (pipe(a->pipes[i].fd) < 0)
-			i += 0;
-			// free main
+			quit(a, "error : can't create pipe");
 		i++;
 	}
 }
@@ -136,5 +73,5 @@ int	main(int argc, char **argv, char **env)
 	close_pipes(&a);
 	wait(&status);
 	//return (WEXITSTATUS(status));
-	return (0);
+	return (status);
 }

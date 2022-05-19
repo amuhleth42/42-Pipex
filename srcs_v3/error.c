@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/25 17:00:16 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/02/25 17:57:04 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 15:34:33 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,28 @@ void	die(char *s)
 	ft_putstr_fd("pipex: ", STDERR);
 	perror(s);
 	exit(EXIT_FAILURE);
+}
+
+void	quit(t_data *a, char *s)
+{
+	if (a->pipes)
+	{
+		free(a->pipes);
+		a->pipes = NULL;
+	}
+	die(s);
+}
+
+void	free_split(char **strs)
+{
+	int	i;
+
+	if (!strs)
+		return ;
+	i = 0;
+	while (strs[i])
+		free(strs[i++]);
+	free(strs);
 }
 
 void	handle_input_error(int argc, char **argv, t_data *a)

@@ -6,7 +6,7 @@
 /*   By: amuhleth <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/25 18:08:51 by amuhleth          #+#    #+#             */
-/*   Updated: 2022/05/17 18:08:29 by amuhleth         ###   ########.fr       */
+/*   Updated: 2022/05/19 15:32:08 by amuhleth         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,13 @@ char	*get_path(char **env, char *cmd)
 		file = ft_strjoin(tmp, cmd);
 		free(tmp);
 		if (access(file, F_OK) == 0)
+		{
+			free_split(dirs);
 			return (file);
+		}
 		free(file);
 		i++;
 	}
+	free_split(dirs);
 	return (NULL);
 }
